@@ -5,11 +5,20 @@ import webbrowser
 import cgitb 
 cgitb.enable()
 
-m0 = folium.Map()
+# centers map on simrall
+m0 = folium.Map(width="50%", location=[33.4526221, -88.7872477], zoom_start=100)
 LocateControl().add_to(m0)
 folium.ClickForLatLng().add_to(m0)
-m0.save("map_index0.html")
-webbrowser.open_new_tab('map_index0.html')
+m0.save("map_index.html")
+
+
+# modify html here
+
+
+
+# open web browser
+webbrowser.open_new_tab('map_index.html')
+
 #x an y coord
 x1 = float(input("Enter The Starting Position North:"))
 x2 = float(input("Enter The Starting Position West:"))
