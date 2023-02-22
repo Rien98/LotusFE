@@ -1,30 +1,35 @@
+import json
+import dash # install dash with pip install -U dash
+import dash_leaflet as dl
+from dash import html
+from dash.dependencies import Input, Output, ALL
 
-import folium
-from folium.plugins import LocateControl
-import webbrowser
-import cgitb 
-cgitb.enable()
+# initialize locations
+waypoints = []
 
-m0 = folium.Map()
-LocateControl().add_to(m0)
-folium.ClickForLatLng().add_to(m0)
-m0.save("map_index0.html")
-webbrowser.open_new_tab('map_index0.html')
-#x an y coord
-x1 = float(input("Enter The Starting Position North:"))
-x2 = float(input("Enter The Starting Position West:"))
-y1 = float(input("Enter The Ending Position North:"))
-y2 = float(input("Enter The Starting Position West:"))
-x = (x1, x2)
-y = (y1, y2)
+# create front end
+FE = dash.Dash(prevent_initial_callbacks=True)
+FE.layout = html.Div(children=[
+    html.H1("L.O.T.U.S. Dashboard"),
 
-m = folium.Map(location = [x1,x2],zoom_start=17) #creating masking layer via direct
-LocateControl().add_to(m)
-loc =[x,y]
-folium.LatLngPopup().add_to(m)
-folium.Marker([x1,x2],tooltip="<i>Starting Position</i>").add_to(m)
-folium.Marker([y1,y2],tooltip="<i>Ending Position</i>").add_to(m)
-folium.PolyLine(loc,color='blue', weight=10).add_to(m)
+    dl.Map(
+        [dl.TileLayer(), dl.LayerGroup(id="layer")],
+        id="map",
+        style={'width': '1000px', 'height': '50vh', 'margin': "auto", "display": "block"},
+        center=[33.4526221, -88.7872477],
+        zoom=100
+    ),
+])
 
-m.save("map_index.html")
-webbrowser.open_new_tab('map_index.html')
+# store click lat longs
+@FE.callback(Output("layer", "children"), [Input("map", "click_lat_lng")])
+def map_click(click_lat_lng):
+    location = (click_lat_lng)
+    # appends the waypoints vector with the coordinates
+    waypoints.append("{:.8f},{:.8f}".format(*click_lat_lng))
+    print(location)
+    return [dl.Marker(position=click_lat_lng, children=dl.Tooltip("({:.3f}, {:.3f})".format(*click_lat_lng)))]
+
+# run server
+if __name__ == '__main__':
+    FE.run_server()
